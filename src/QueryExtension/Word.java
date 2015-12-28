@@ -18,6 +18,15 @@ public class Word {
     public Word(String word){
         this.word = word;
     }
+    public Word(String word, String pos){
+        this.word = word;
+        this.pos = pos;
+    }
+    public Word(String word, String pos, double weight){
+        this.word = word;
+        this.pos = pos;
+        this.weight = weight;
+    }
 
     @Override
     public String toString() {
@@ -29,6 +38,7 @@ public class Word {
         for ( Word word : synonyms ){
             s += (word.getWord()+","+word.getWeight())+" | ";
         }
+        s += "\n\n";
         return s;
     }
 
