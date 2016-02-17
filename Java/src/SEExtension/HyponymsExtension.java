@@ -18,13 +18,8 @@ import java.util.List;
  */
 public class HyponymsExtension {
 	private HashMap<String, List<String>> hype2HyposMap = null;
-	private HowNet WSInstance = null;
-	 HowNet howNet = null;
 	public HyponymsExtension() throws IOException {
-		MappingFile mf = new MappingFile();
-		hype2HyposMap = mf.loadHypoMappingFile(mf.getSEMappingFile());
-		 WSInstance = new HowNet(); // 暂时使用hownet计算相似度
-		  howNet = (HowNet) WSInstance; 
+		hype2HyposMap = MappingFile.loadHypoMappingFile(MappingFile.getSEMappingFile());
 	}
 
 	public HashMap<String, List<String>> getHype2HyposMap() {
@@ -32,7 +27,6 @@ public class HyponymsExtension {
 	}
 
 	public Query extend(Query query) {
-		
 		if (query.getTitleSegment() != null) {
 			for (ACWord word : query.getTitleSegment()) {
 				extend(word);
@@ -62,7 +56,7 @@ public class HyponymsExtension {
 			List<String> hyponyms = hype2HyposMap.get(word.getWord());
 			for (String hyponym : hyponyms) { // 将String类型下位词修改为Word类型
 				String tagger = word.getPos(); // 扩展词词性默认与原词词性相同
-				double weight = howNet.simWord(word.getWord(), hyponym); // 调用实例化相似度计算类的相似度计算方法，计算下位词与原词的相似度
+				double weight = HowNet.simWord(word.getWord(), hyponym); // 调用实例化相似度计算类的相似度计算方法，计算下位词与原词的相似度
 				ACWord hyponymWord = new ACWord();
 				hyponymWord.setWord(hyponym);
 				hyponymWord.setPos(tagger);

@@ -12,61 +12,61 @@ import org.answercow.utils.RLog;
  */
 public class HowNet {
 
-	private Map<String, List<Word>> ALLWORDS = new HashMap<String, List<Word>>(); // glossary.dat中所有的具体词，或者义原
-	private Map<Integer, Primitive> ALLPRIMITIVES_zh = new HashMap<Integer, Primitive>(); // WHOLE.DAT中所有的义原(中文表示)
-	private Map<Integer, Primitive> ALLPRIMITIVES_en = new HashMap<Integer, Primitive>(); // WHOLE.DAT中所有的义原(英文表示)
-	private Map<String, Integer> PRIMITIVESID_zh = new HashMap<String, Integer>(); // 建立义原(中文表示)到ID的映射
-	private Map<String, Integer> PRIMITIVESID_en = new HashMap<String, Integer>(); // 建立义原(英文表示)到ID的映射
-	private String glossaryFilePath = CowConfig.MODEL_FILE_PREFIX()
+	private static Map<String, List<Word>> ALLWORDS = new HashMap<String, List<Word>>(); // glossary.dat中所有的具体词，或者义原
+	private static Map<Integer, Primitive> ALLPRIMITIVES_zh = new HashMap<Integer, Primitive>(); // WHOLE.DAT中所有的义原(中文表示)
+	private static Map<Integer, Primitive> ALLPRIMITIVES_en = new HashMap<Integer, Primitive>(); // WHOLE.DAT中所有的义原(英文表示)
+	private static Map<String, Integer> PRIMITIVESID_zh = new HashMap<String, Integer>(); // 建立义原(中文表示)到ID的映射
+	private static Map<String, Integer> PRIMITIVESID_en = new HashMap<String, Integer>(); // 建立义原(英文表示)到ID的映射
+	private static String glossaryFilePath = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/glossary.dat"; // 设置本地测试glossary.dat文件路径
-	private String wholeFilePath = CowConfig.MODEL_FILE_PREFIX()
+	private static String wholeFilePath = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/WHOLE.DAT"; // 设置本地测试WHOLE.DAT文件路径
-	private String semdictFilePath = CowConfig.MODEL_FILE_PREFIX()
+	private static String semdictFilePath = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/semdict.dat"; // 设置本地测试semdict.dat文件路径
 	/**
 	 * sim(p1,p2) = alpha/(d+alpha)
 	 */
-	private double alpha = 1.6;
+	private static double alpha = 1.6;
 	/**
 	 * 计算实词的相似度，参数，基本义原权重
 	 */
-	private double beta1 = 0.5;
+	private static double beta1 = 0.5;
 	/**
 	 * 计算实词的相似度，参数，其他义原权重
 	 */
-	private double beta2 = 0.2;
+	private static double beta2 = 0.2;
 	/**
 	 * 计算实词的相似度，参数，关系义原权重
 	 */
-	private double beta3 = 0.17;
+	private static double beta3 = 0.17;
 	/**
 	 * 计算实词的相似度，参数，关系符号义原权重
 	 */
-	private double beta4 = 0.13;
+	private static double beta4 = 0.13;
 	/**
 	 * 具体词与义原的相似度一律处理为一个比较小的常数. 具体词和具体词的相似度，如果两个词相同，则为1，否则为0.
 	 */
-	private double gamma = 0.2;
+	private static double gamma = 0.2;
 	/**
 	 * 将任一非空值与空值的相似度定义为一个比较小的常数
 	 */
-	private double delta = 0.2;
+	private static double delta = 0.2;
 	/**
 	 * 两个无关义原之间的默认距离
 	 */
-	private int DEFAULT_PRIMITIVE_DIS = 20;
+	private static int DEFAULT_PRIMITIVE_DIS = 20;
 	/**
 	 * 知网中的逻辑符号
 	 */
-	private String LOGICAL_SYMBOL = ",~^";
+	private static String LOGICAL_SYMBOL = ",~^";
 	/**
 	 * 知网中的关系符号
 	 */
-	private String RELATIONAL_SYMBOL = "#%$*+&@?!";
+	private static String RELATIONAL_SYMBOL = "#%$*+&@?!";
 	/**
 	 * 知网中的特殊符号，虚词，或具体词
 	 */
-	private String SPECIAL_SYMBOL = "{";
+	private static String SPECIAL_SYMBOL = "{";
 
 	/**
 	 * 默认加载文件
@@ -79,7 +79,7 @@ public class HowNet {
 	/**
 	 * 加载 glossay.dat 文件 glossory.dat文件每一行格式： 汉语词语 词性 词语义原集合
 	 */
-	public void loadGlossary() {
+	public static void loadGlossary() {
 		String line = null;
 		BufferedReader reader = null;
 		try {
@@ -127,7 +127,7 @@ public class HowNet {
 	/**
 	 * 加载义原文件 WHOLE.DAT glossory.dat文件每一行格式： 义原ID 义原(英文|中文)表示 父义原ID
 	 */
-	public void loadWhole() {
+	public static void loadWhole() {
 		String line = null;
 		BufferedReader reader = null;
 		try {
@@ -160,7 +160,7 @@ public class HowNet {
 	 * 
 	 * @param related
 	 */
-	public void parseDetail(String related, Word word) {
+	public static void parseDetail(String related, Word word) {
 		// spilt by ","
 		String[] parts = related.split(",");
 		boolean isFirst = true;
@@ -249,7 +249,7 @@ public class HowNet {
 	 * 
 	 * @param word
 	 */
-	public void addWord(Word word) {
+	public static void addWord(Word word) {
 		List<Word> list = ALLWORDS.get(word.getWord());
 
 		if (list == null) {
@@ -274,7 +274,7 @@ public class HowNet {
 	 * @param str
 	 * @return 一个代表类别的整数，其值为1，2，3。
 	 */
-	public int getPrimitiveType(String str) {
+	public static int getPrimitiveType(String str) {
 		String first = Character.toString(str.charAt(0));
 		if (RELATIONAL_SYMBOL.contains(first)) {
 			return 1;
@@ -288,7 +288,7 @@ public class HowNet {
 	/**
 	 * 计算两个词语的相似度
 	 */
-	public double simWord(String word1, String word2) {
+	public static double simWord(String word1, String word2) {		
 		if (ALLWORDS.containsKey(word1) && ALLWORDS.containsKey(word2)) {
 			List<Word> list1 = ALLWORDS.get(word1);
 			List<Word> list2 = ALLWORDS.get(word2);
@@ -303,7 +303,7 @@ public class HowNet {
 		}
 		if (ALLWORDS.containsKey(word1) && !ALLWORDS.containsKey(word2)) {
 			RLog.debug("glossay.dat中没有收录" + word2);
-		} else if (!ALLWORDS.containsKey(word1) && !ALLWORDS.containsKey(word2)) {
+		} else if (!ALLWORDS.containsKey(word1) && ALLWORDS.containsKey(word2)) {
 			RLog.debug("glossay.dat中没有收录" + word1);
 		} else {
 			RLog.debug("glossay.dat中没有收录" + word1 + "和" + word2);
@@ -319,7 +319,7 @@ public class HowNet {
 	 * @param w2
 	 * @return
 	 */
-	public double simWord(Word w1, Word w2) {
+	public static double simWord(Word w1, Word w2) {
 		// 虚词和实词的相似度为零
 		if (w1.isStructruralWord() != w2.isStructruralWord()) {
 			return 0;
@@ -370,7 +370,7 @@ public class HowNet {
 	 * @param map2
 	 * @return
 	 */
-	public double simMap(Map<String, List<String>> map1,
+	public static double simMap(Map<String, List<String>> map1,
 			Map<String, List<String>> map2) {
 		if (map1.isEmpty() && map2.isEmpty()) {
 			return 1;
@@ -396,7 +396,7 @@ public class HowNet {
 	 * @param list2
 	 * @return
 	 */
-	public double simList(List<String> list1, List<String> list2) {
+	public static double simList(List<String> list1, List<String> list2) {
 		if (list1.isEmpty() && list2.isEmpty())
 			return 1;
 		if (list1 == list2)
@@ -436,7 +436,7 @@ public class HowNet {
 	 * @param word2
 	 * @return
 	 */
-	private double innerSimWord(String word1, String word2) {
+	private static double innerSimWord(String word1, String word2) {
 		Primitive primitive = new Primitive();
 		boolean isPrimitive1 = Primitive.isPrimitive(word1, PRIMITIVESID_en,
 				PRIMITIVESID_zh);
@@ -461,7 +461,7 @@ public class HowNet {
 	 * @param primitive2
 	 * @return
 	 */
-	public double simPrimitive(String primitive1, String primitive2) {
+	public static double simPrimitive(String primitive1, String primitive2) {
 		int dis = disPrimitive(primitive1, primitive2);
 		return alpha / (dis + alpha);
 	}
@@ -473,7 +473,7 @@ public class HowNet {
 	 * @param primitive2
 	 * @return 两个义原的距离（WHOLE.DAT义原树状结构的路径长度）
 	 */
-	public int disPrimitive(String primitive1, String primitive2) {
+	public static int disPrimitive(String primitive1, String primitive2) {
 		Primitive primitive = new Primitive();
 		List<Integer> list1 = primitive.getParents(primitive1,
 				ALLPRIMITIVES_zh, PRIMITIVESID_zh, PRIMITIVESID_en);
@@ -490,7 +490,8 @@ public class HowNet {
 	}
 
 	public static void main(String[] args) throws Exception {
-		HowNet howNet = new HowNet();
+		HowNet.loadGlossary();
+		HowNet.loadWhole();
 		Scanner sc = new Scanner(System.in);
 
 		RLog.debug("请输入两个待比较相似度的中文词，以空白符分割");
@@ -498,7 +499,7 @@ public class HowNet {
 			String line = sc.nextLine();
 			String[] sWords = line.split("\\s");
 			System.out.format("simWord(String, String): sim(%s, %s)=%f\n",
-					sWords[0], sWords[1], howNet.simWord(sWords[0], sWords[1]));
+					sWords[0], sWords[1], HowNet.simWord(sWords[0], sWords[1]));
 		}
 
 		// RLog.debug("请输入两个待比较相似度的中文词（包括对应的词性， 中国/N)，以空白符分割");

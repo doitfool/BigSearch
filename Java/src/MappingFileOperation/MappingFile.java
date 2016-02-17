@@ -1,6 +1,7 @@
 package org.answercow.stream.intent.queryExtent.MappingFileOperation;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -15,17 +16,34 @@ import com.hankcs.hanlp.collection.dartsclone.Pair;
  * 已完成元搜索下位词扩展，
  */
 public class MappingFile {
-	private String SEMappingFile = CowConfig.MODEL_FILE_PREFIX()
+	private static String SEMappingFile = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/WordNetHypo_zh.txt"; // 元搜索下位词扩展文件
-	private String KBRelationExtendFile = CowConfig.MODEL_FILE_PREFIX()
+	private static String KBRelationExtendFile = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/FBRelationExtendFile.txt"; // 知识图谱关系扩展文件
-	private String KBEntityMappingFile = CowConfig.MODEL_FILE_PREFIX()
+	private static String KBEntityMappingFile = CowConfig.MODEL_FILE_PREFIX()
 			+ "queryExtent/FBEntityMappingFile.txt"; // 知识图谱实体映射文件
-
+	private static String TongyiciCilinFile = CowConfig.MODEL_FILE_PREFIX()
+			+ "queryExtent/synonym.txt";	// 同义词词林同义词扩展文件
+	
 	// 可考虑更高级别抽象，直接loadMappingFile将所有映射词典载入内存
 
+	// 同义词词林扩展文件载入
+	public static List<ArrayList<String>> loadTongyiciCilinFile(String filename) throws IOException{
+		List<ArrayList<String>> synonymList = new ArrayList<ArrayList<String>>();
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String line;
+		while ( (line = br.readLine()) != null ){
+			ArrayList<String> synonyms = new ArrayList<String>();
+			for ( String synonym : line.split(" ") ){
+				synonyms.add(synonym);
+			}
+			synonymList.add(synonyms);
+		}
+		return synonymList;
+	}
+	
 	// 元搜索下位词词典载入
-	public HashMap<String, List<String>> loadHypoMappingFile(String filename)
+	public static HashMap<String, List<String>> loadHypoMappingFile(String filename)
 			throws IOException {
 		HashMap<String, List<String>> hype2HyposMap = new HashMap<String, List<String>>();
 		BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -47,7 +65,7 @@ public class MappingFile {
 	}
 
 	// 知识图谱关系扩展词典载入
-	public HashMap<String, List<Pair<String, Double>>> loadKBRelationMappingFile(
+	public static HashMap<String, List<Pair<String, Double>>> loadKBRelationMappingFile(
 			String filename) throws IOException {
 		HashMap<String, List<Pair<String, Double>>> relationExt2uriMap = new HashMap<String, List<Pair<String, Double>>>(); // 关系的中英文表示到URI的映射
 		BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -96,7 +114,7 @@ public class MappingFile {
 		return relationExt2uriMap;
 	}
 
-	public HashMap<String, List<Pair<String, Double>>> loadKBEntityMappingFile(
+	public static HashMap<String, List<Pair<String, Double>>> loadKBEntityMappingFile(
 			String filename) throws IOException {
 		HashMap<String, List<Pair<String, Double>>> entity2uriMap = new HashMap<String, List<Pair<String, Double>>>();
 		BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -147,19 +165,19 @@ public class MappingFile {
 		return entity2uriMap;
 	}
 
-	public String getSEMappingFile() {
+	public static String getSEMappingFile() {
 		return SEMappingFile;
 	}
 
-	public String getKBRelationMappingFile() {
+	public static String getKBRelationMappingFile() {
 		return KBRelationExtendFile;
 	}
 
-	public String getKBEntityMappingFile() {
+	public static String getKBEntityMappingFile() {
 		return KBEntityMappingFile;
 	}
 
-	public void setKBEntityMappingFile(String kBEntityMappingFile) {
+	public static void setKBEntityMappingFile(String kBEntityMappingFile) {
 		KBEntityMappingFile = kBEntityMappingFile;
 	}
 
@@ -183,6 +201,14 @@ public class MappingFile {
 		List<Pair<String, Double>> f = relationExt2uriMap.get("出生日期");
 		RLog.debug(f);
 
+	}
+
+	public static String getTongyiciCilinFile() {
+		return TongyiciCilinFile;
+	}
+
+	public static void setTongyiciCilinFile(String tongyiciCilinFile) {
+		TongyiciCilinFile = tongyiciCilinFile;
 	}
 
 }

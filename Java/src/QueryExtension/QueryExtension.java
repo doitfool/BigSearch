@@ -12,8 +12,11 @@ import javax.xml.rpc.ServiceException;
 import org.answercow.stream.common.DataFormat;
 import org.answercow.stream.common.Query;
 import org.answercow.stream.common.ACWord;
+import org.answercow.stream.intent.queryExtent.HowNet.HowNet;
 import org.answercow.stream.intent.queryExtent.KBExtension.KBWordMapping;
 import org.answercow.stream.intent.queryExtent.SEExtension.HyponymsExtension;
+import org.answercow.stream.intent.queryExtent.SEExtension.SimilarExtension;
+import org.answercow.stream.intent.queryExtent.TongyiciCilin.TongyiciCilin;
 import org.answercow.stream.intent.queryExtent.Word2Vec.W2VWebService;
 import org.answercow.stream.intent.queryExtent.Word2Vec.Word2VEC;
 import org.answercow.utils.RLog;
@@ -32,13 +35,17 @@ import tns.Application_ServiceLocator;
 public class QueryExtension {
 	KBWordMapping kbWordMapping = null;
 	HyponymsExtension hypoExt = null;
-
-	public QueryExtension() {
-
+	SimilarExtension synoExt = null;
+	W2VWebService w2vWebService = null;
+	public QueryExtension() throws Exception {
 		try {
-			kbWordMapping = new KBWordMapping();
-			// 对titleSegment和bodySegment进行知识图谱映射
+			w2vWebService = new W2VWebService();
+			HowNet.loadGlossary();
+			HowNet.loadWhole();
+			kbWordMapping = new KBWordMapping();	// 对titleSegment和bodySegment进行知识图谱映射
 			hypoExt = new HyponymsExtension(); // 对titleSegment和bodySegment进行元搜索下位词扩展
+			synoExt = new SimilarExtension(w2vWebService);	//	对titleSegment和bodySegment进行同义词扩展
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			RLog.error(e.getMessage());
@@ -50,24 +57,22 @@ public class QueryExtension {
 		List<ACWord> titleSegment = query.getTitleSegment();
 		List<ACWord> bodySegment = query.getBodySegment();
 
-		W2VWebService w2vWebService = new W2VWebService(); // 对titleSegment和bodySegment进行元搜索同义词扩展
-		try {
-			w2vWebService.extend(query);
-		} catch (Exception e) {
-
+		// 基于同义词词林扩展同义词，使用Word2vec计算词语相似度
+		if ( synoExt != null ){
+			synoExt.extend(query);
 		}
-
-		try {
-			if (hypoExt != null)
-				hypoExt.extend(query);
-		} catch (Exception e) {
-
+		
+		// 基于nltk建立的上下位词词典扩展下位词，使用hownet计算词语相似度
+		if (hypoExt != null){
+			hypoExt.extend(query);
 		}
-		if (kbWordMapping != null)
+		
+		// 基于知识图谱映射文件扩展实体和关系
+		if (kbWordMapping != null){
 			kbWordMapping.extend(query);
-
+		}
+		
 		return query;
-
 	}
 
 	public static void main(String[] args) throws Exception {

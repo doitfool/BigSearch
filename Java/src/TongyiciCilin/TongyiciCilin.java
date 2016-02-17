@@ -6,5 +6,7 @@ package org.answercow.stream.intent.queryExtent.TongyiciCilin;
  * @description
  */
 public class TongyiciCilin {
-
+	public TongyiciCilin(){
+		
+	}
 }
