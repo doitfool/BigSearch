@@ -1,5 +1,5 @@
 # coding: utf-8
-import soaplib
+import soaplib # soaplib-2.0.0b2
 from soaplib.core.util.wsgi_wrapper import run_twisted #发布服务
 from soaplib.core.server import wsgi
 from soaplib.core.service import DefinitionBase  #所有服务类必须继承该类
